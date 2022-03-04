@@ -18,6 +18,7 @@ static struct Display {
 	char buffer[LCD_BUFFER_SIZE];
 	uint16_t buffer_start;
 	uint16_t buffer_stop;
+	uint16_t buffer_pos;
 	uint16_t x_pos;
 	uint16_t y_pos;
 	esp_lcd_panel_handle_t panel_handle;
