@@ -178,7 +178,7 @@ void copy_msg_to_buffer(struct Display* dp, const char* msg)
 
 struct Letter* select_letter(uint8_t input)
 {	
-	for(uint8_t i = 0; i < 37; ++i)
+	for(uint8_t i = 0; i < 40; ++i)
 	{
 		if(affont[i].ascii_index == input)
 		{

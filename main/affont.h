@@ -43,6 +43,10 @@ static uint8_t X_dots[22] = {0,6,7,13,15,19,22,26,30,32,38,45,51,53,58,61,64,68,
 static uint8_t Y_dots[18] = {0,6,7,13,15,19,22,26,30,32,38,45,52,59,66,73,80};
 static uint8_t Z_dots[22] = {0,1,2,3,4,5,11,16,22,27,33,38,44,49,55,60,66,67,68,69,70};
   
+static uint8_t heart_dots[21] = {11,12,14,15,19,22,25,27,35,36,44,45,53,55,61,65,69,75,76,77,85};
+static uint8_t pi_dots[30] = {10,11,12,13,14,15,16,17,18,20,24,29,33,38,42,47,51,56,60,65,69,74,78,83,87,89,91,97};
+static uint8_t men_dots[26] = {1,2,3,5,6,7,9,10,11,14,18,20,21,22,23,26,30,33,35,37,39,40,43,44,47};
+
 static struct Letter {
 	uint8_t ascii_index;
 	uint8_t width;
@@ -50,7 +54,7 @@ static struct Letter {
 	uint8_t dot_cnt;
 };
  	
-static struct Letter affont[37] = {
+static struct Letter affont[40] = {
 	{0x0, 9, empty_dots, 0},
 	{0x30, 6, zero_dots, 24},
 	{0x31, 4, one_dots, 15},
@@ -87,4 +91,7 @@ static struct Letter affont[37] = {
 	{0x57, 11, W_dots, 33},
 	{0x58, 7, X_dots, 22},
 	{0x59, 7, Y_dots, 18},
-	{0x5A, 6, Z_dots, 22}};
+	{0x5A, 6, Z_dots, 22},
+	{0x80, 9, heart_dots, 21},
+	{0x81, 9, pi_dots, 30},
+	{0x82, 5, men_dots, 26}};
