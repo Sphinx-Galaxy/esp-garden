@@ -178,7 +178,7 @@ void copy_msg_to_buffer(struct Display* dp, const char* msg)
 
 struct Letter* select_letter(uint8_t input)
 {	
-	for(uint8_t i = 0; i < 41; ++i)
+	for(uint8_t i = 0; i < 45; ++i)
 	{
 		if(affont[i].ascii_index == input)
 		{
@@ -212,7 +212,7 @@ void draw_letter_pixline(uint16_t* buffer, const uint16_t x_pos, const uint16_t 
 				&& (y_pos - LETTER_HEIGHT_MARGIN + 1) * letter->width > letter->dots[i])
 			{
 				uint16_t dot_pos = letter->dots[i]%letter->width + LETTER_WIDTH_MARGIN + x_pos;
-				buffer[dot_pos] = 0xFFFF;	
+				buffer[dot_pos] = letter->color;	
 			}
 		}
 	}
