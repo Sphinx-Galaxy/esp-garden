@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 
+#define MAX_LETTER_WIDTH 9
+
 static uint8_t empty_dots[0] = {};
 static uint8_t zero_dots[24] = {2,3,7,10,12,17,18,23,24,29,30,35,36,41,42,47,48,53,54,59,61,64,68,69};
 static uint8_t one_dots[15] = {2,3,5,7,8,11,15,19,23,27,31,35,39,43,47};
