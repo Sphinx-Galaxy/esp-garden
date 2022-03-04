@@ -132,11 +132,12 @@ void app_main(void)
     ESP_ERROR_CHECK(gpio_set_level(EXAMPLE_PIN_NUM_BK_LIGHT, EXAMPLE_LCD_BK_LIGHT_ON_LEVEL));
 	
 	// Display testing
-    struct Display dp = {{}, 0, 0, 0, 0, panel_handle};
+    struct Display dp = {{}, 0, 0, 0, 0, 0, panel_handle};
   	
   	display_clear(&dp);
   	
-  	display_write(&dp, "MATTIS TEST\n");
+  	display_write(&dp, "MATTIS");
+  	display_write(&dp, "TEST\n");
   	
   	char res[32];
   	
