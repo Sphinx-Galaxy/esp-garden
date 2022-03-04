@@ -3,6 +3,8 @@
 
 #define MAX_LETTER_WIDTH 9
 
+static uint8_t dot_dots[4] = {40,41,44,45};
+
 static uint8_t empty_dots[0] = {};
 static uint8_t zero_dots[24] = {2,3,7,10,12,17,18,23,24,29,30,35,36,41,42,47,48,53,54,59,61,64,68,69};
 static uint8_t one_dots[15] = {2,3,5,7,8,11,15,19,23,27,31,35,39,43,47};
@@ -54,8 +56,9 @@ static struct Letter {
 	uint8_t dot_cnt;
 };
  	
-static struct Letter affont[40] = {
+static struct Letter affont[44] = {
 	{0x0, 9, empty_dots, 0},
+	{0x2E, 4, dot_dots, 4},
 	{0x30, 6, zero_dots, 24},
 	{0x31, 4, one_dots, 15},
 	{0x32, 7, two_dots, 21},
