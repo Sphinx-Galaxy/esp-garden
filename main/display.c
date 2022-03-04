@@ -2,6 +2,12 @@
 
 #include <stdio.h>
 
+#include "esp_lcd_panel_vendor.h"
+#include "esp_lcd_panel_ops.h"
+#include "esp_heap_caps.h"
+#include "driver/spi_master.h"
+#include "driver/gpio.h"
+
 void copy_msg_to_buffer(struct Display* dp, const char* msg);
 struct Letter* select_letter(uint8_t input);
 uint16_t get_letter_pixline(uint16_t* buffer, const uint16_t x_pos, const uint16_t y_pos, const struct Letter* letter);
@@ -13,6 +19,95 @@ bool is_end_of_buffer(const struct Display* dp);
 bool is_end_of_line(const struct Display* dp);
 
 void empty_buffer(uint16_t* buffer, const uint16_t start, const uint16_t stop);
+
+struct Display* display_init() 
+{
+    gpio_config_t bk_gpio_config = {
+        .mode = GPIO_MODE_OUTPUT,
+        .pin_bit_mask = 1ULL << PIN_NUM_BK_LIGHT
+    };
+    // Initialize the GPIO of backlight
+    ESP_ERROR_CHECK(gpio_config(&bk_gpio_config));
+
+    spi_bus_config_t buscfg = {
+        .sclk_io_num = PIN_NUM_PCLK,
+        .mosi_io_num = PIN_NUM_DATA0,
+        .miso_io_num = -1,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = LCD_H_RES * 2 + 8
+    };
+#if CONFIG_LCD_SPI_8_LINE_MODE
+    buscfg.data1_io_num = PIN_NUM_DATA1;
+    buscfg.data2_io_num = PIN_NUM_DATA2;
+    buscfg.data3_io_num = PIN_NUM_DATA3;
+    buscfg.data4_io_num = PIN_NUM_DATA4;
+    buscfg.data5_io_num = PIN_NUM_DATA5;
+    buscfg.data6_io_num = PIN_NUM_DATA6;
+    buscfg.data7_io_num = PIN_NUM_DATA7;
+    buscfg.flags = SPICOMMON_BUSFLAG_OCTAL;
+#endif
+    // Initialize the SPI bus
+    ESP_ERROR_CHECK(spi_bus_initialize(LCD_HOST, &buscfg, SPI_DMA_CH_AUTO));
+
+    esp_lcd_panel_io_handle_t io_handle = NULL;
+    esp_lcd_panel_io_spi_config_t io_config = {
+        .dc_gpio_num = PIN_NUM_DC,
+        .cs_gpio_num = PIN_NUM_CS,
+        .pclk_hz = LCD_PIXEL_CLOCK_HZ,
+        .lcd_cmd_bits = LCD_CMD_BITS,
+        .lcd_param_bits = LCD_PARAM_BITS,
+        .spi_mode = 0,
+        .trans_queue_depth = 10,
+    };
+#if CONFIG_LCD_SPI_8_LINE_MODE
+    io_config.spi_mode = 3;  // using mode 3 to simulate Intel 8080 timing
+    io_config.flags.octal_mode = 1;
+#endif
+    // Attach the LCD to the SPI bus
+    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)LCD_HOST, &io_config, &io_handle));
+
+    esp_lcd_panel_handle_t panel_handle = NULL;
+    esp_lcd_panel_dev_config_t panel_config = {
+        .reset_gpio_num = PIN_NUM_RST,
+        .color_space = ESP_LCD_COLOR_SPACE_BGR,
+        .bits_per_pixel = 16,
+    };
+    // Initialize the LCD configuration
+    ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(io_handle, &panel_config, &panel_handle));
+
+    // Turn off backlight to avoid unpredictable display on the LCD screen while initializing
+    // the LCD panel driver. (Different LCD screens may need different levels)
+    ESP_ERROR_CHECK(gpio_set_level(PIN_NUM_BK_LIGHT, LCD_BK_LIGHT_OFF_LEVEL));
+
+    // Reset the display
+    ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
+
+    // Initialize LCD panel
+    ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
+
+    // Swap x and y axis (Different LCD screens may need different options)
+    ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(panel_handle, true));
+
+    // Turn on backlight (Different LCD screens may need different levels)
+    ESP_ERROR_CHECK(gpio_set_level(PIN_NUM_BK_LIGHT, LCD_BK_LIGHT_ON_LEVEL));
+    
+    
+    struct Display* dp = malloc(sizeof(struct Display));
+    dp->buffer_start = 0;
+    dp->buffer_stop = 0;
+    dp->buffer_pos = 0;
+    dp->x_pos= 0;
+    dp->y_pos = 0;
+    dp->panel_handle = panel_handle;
+    
+    return dp;
+}
+
+void display_destroy(struct Display* dp)
+{
+
+}
 
 void display_write(struct Display* dp, const char* msg)
 {

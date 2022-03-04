@@ -3,8 +3,35 @@
 #include "affont.h"
 
 #include "esp_lcd_panel_io.h"
-#include "esp_lcd_panel_vendor.h"
-#include "esp_lcd_panel_ops.h"
+
+#define LCD_HOST       SPI2_HOST
+
+#define LCD_PIXEL_CLOCK_HZ (10 * 1000 * 1000)
+#define LCD_BK_LIGHT_ON_LEVEL  0
+#define LCD_BK_LIGHT_OFF_LEVEL !LCD_BK_LIGHT_ON_LEVEL
+#define PIN_NUM_DATA0          23  /*!< for 1-line SPI, this also refered as MOSI */
+#define PIN_NUM_PCLK           19
+#define PIN_NUM_CS             22
+#define PIN_NUM_DC             21
+#define PIN_NUM_RST            18
+#define PIN_NUM_BK_LIGHT       5
+
+// The pixel number in horizontal and vertical
+#define LCD_H_RES              320
+#define LCD_V_RES              240
+// Bit number used to represent command and parameter
+#define LCD_CMD_BITS           8
+#define LCD_PARAM_BITS         8
+
+#if CONFIG_LCD_SPI_8_LINE_MODE
+#define PIN_NUM_DATA1    7
+#define PIN_NUM_DATA2    8
+#define PIN_NUM_DATA3    9
+#define PIN_NUM_DATA4    10
+#define PIN_NUM_DATA5    11
+#define PIN_NUM_DATA6    12
+#define PIN_NUM_DATA7    13
+#endif // CONFIG_LCD_SPI_8_LINE_MODE
 
 #define LCD_H_RES		320
 #define LCD_V_RES		240
@@ -24,6 +51,8 @@ static struct Display {
 	esp_lcd_panel_handle_t panel_handle;
 };
 
+struct Display* display_init();
+void display_destroy(struct Display* dp);
+
 void display_clear(const struct Display* dp);
 void display_write(struct Display* dp, const char* msg);
-void update(struct Display* dp);

@@ -256,9 +256,9 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# Example Configuration
+# Configuration
 #
-# end of Example Configuration
+# end of Configuration
 
 #
 # Compiler options
