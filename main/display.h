@@ -1,3 +1,10 @@
+/*
+ * Author: Mattis Jaksch
+ * Created: 03.03.2022
+ *
+ * ESP-WROVER-KIT LCD (320x240px)
+ */
+
 #pragma once
 
 #include "affont.h"

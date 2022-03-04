@@ -1,4 +1,11 @@
-#include "display.h"
+/*
+ * Author: Mattis Jaksch
+ * Created: 03.03.2022
+ *
+ * ESP-WROVER-KIT LCD (320x240px)
+ */
+ 
+ #include "display.h"
 
 #include <stdio.h>
 
@@ -106,9 +113,10 @@ struct Display* display_init()
 
 void display_destroy(struct Display* dp)
 {
-
+	free(dp);
 }
 
+/* TODO: Check on too long messages */
 void display_write(struct Display* dp, const char* msg)
 {
 	copy_msg_to_buffer(dp, msg);
@@ -124,7 +132,7 @@ void display_write(struct Display* dp, const char* msg)
 	
 		empty_buffer(line[calc_line], 0, LCD_H_RES);
 		
-		/* Write line function */
+		/* TODO: Move to write line function */
 		dp->buffer_pos = dp->buffer_start;
 		dp->x_pos = 0;
 		while(dp->x_pos < LCD_H_RES
