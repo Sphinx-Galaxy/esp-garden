@@ -87,4 +87,4 @@ static struct Letter affont[37] = {
 	{0x57, 11, W_dots, 33},
 	{0x58, 7, X_dots, 22},
 	{0x59, 7, Y_dots, 18},
-	{0x60, 6, Z_dots, 22}};
+	{0x5A, 6, Z_dots, 22}};
