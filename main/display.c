@@ -7,8 +7,10 @@ struct Letter* select_letter(uint8_t input);
 uint16_t get_letter_pixline(uint16_t* buffer, const uint16_t x_pos, const uint16_t y_pos, const struct Letter* letter);
 void draw_letter_pixline(uint16_t* buffer, const uint16_t x_pos, const uint16_t y_pos, const struct Letter* letter);
 
-void set_buffer_start(uint16_t buffer_pos, struct Display* dp);
+void set_buffer_start(struct Display* dp);
+
 bool is_end_of_buffer(const struct Display* dp);
+bool is_end_of_line(const struct Display* dp);
 
 void empty_buffer(uint16_t* buffer, const uint16_t start, const uint16_t stop);
 
@@ -28,19 +30,18 @@ void display_write(struct Display* dp, const char* msg)
 		empty_buffer(line[calc_line], 0, LCD_H_RES);
 		
 		/* Write line function */
-		uint16_t buffer_pos = dp->buffer_start;
-		//printf("Buffer pos at %d (x %d, y %d)\n", buffer_pos, dp->x_pos, dp->y_pos);
-		dp->x_pos = 0; // Start at dp->x_pos
+		dp->buffer_pos = dp->buffer_start;
+		dp->x_pos = 0;
 		while(dp->x_pos < LCD_H_RES
-			&& buffer_pos < dp->buffer_stop
-			&& dp->buffer[buffer_pos%LCD_BUFFER_SIZE] != '\n'
-			&& dp->buffer[buffer_pos%LCD_BUFFER_SIZE] != '\0')
+			&& dp->buffer_pos < dp->buffer_stop
+			&& dp->buffer[dp->buffer_pos%LCD_BUFFER_SIZE] != '\n'
+			&& dp->buffer[dp->buffer_pos%LCD_BUFFER_SIZE] != '\0')
 		{
-			const struct Letter* letter = select_letter(dp->buffer[buffer_pos%LCD_BUFFER_SIZE]);
+			const struct Letter* letter = select_letter(dp->buffer[dp->buffer_pos%LCD_BUFFER_SIZE]);
 			
-			if(dp->x_pos + letter->width + 2*LETTER_WIDTH_MARGIN < LCD_H_RES)
+			if(letter->width + 2 * LETTER_WIDTH_MARGIN + dp->x_pos < LCD_H_RES)
 			{
-				buffer_pos++;
+				dp->buffer_pos++;
 				dp->x_pos += get_letter_pixline(line[calc_line], dp->x_pos, dp->y_pos, letter);
 			}
 		}
@@ -54,8 +55,8 @@ void display_write(struct Display* dp, const char* msg)
 		dp->y_pos++;
 		
 		if(dp->y_pos%LCD_LINE_HEIGHT == 0)
-		{
-			set_buffer_start(buffer_pos, dp);		
+		{			
+			set_buffer_start(dp);		
 			end_of_buffer = is_end_of_buffer(dp);
 		}
 	}
@@ -65,11 +66,11 @@ void copy_msg_to_buffer(struct Display* dp, const char* msg)
 {
 	int pos = 0;
 	do {
-		dp->buffer[(pos+dp->buffer_start)%LCD_BUFFER_SIZE] = msg[pos];
+		dp->buffer[(dp->buffer_stop + pos)%LCD_BUFFER_SIZE] = msg[pos];
 		pos++;
 	} while(msg[pos] != '\0');
 	
-	dp->buffer_stop = pos+dp->buffer_start;
+	dp->buffer_stop += pos;
 }
 
 struct Letter* select_letter(uint8_t input)
@@ -113,19 +114,30 @@ void draw_letter_pixline(uint16_t* buffer, const uint16_t x_pos, const uint16_t 
 		}
 	}
 }
-
-void set_buffer_start(uint16_t buffer_pos, struct Display* dp)
-{
-	dp->buffer_start = buffer_pos;
 	
-	// Skip non-letters
-	dp->buffer_start += (dp->buffer[buffer_pos%LCD_BUFFER_SIZE] == '\n' ? 1 : 0);
+void set_buffer_start(struct Display* dp)
+{
+	if(is_end_of_line(dp))
+	{
+		dp->buffer_pos += (dp->buffer[dp->buffer_pos%LCD_BUFFER_SIZE] == '\n' ? 1 : 0); // Skip non-letters
+		dp->buffer_start = dp->buffer_pos;
+	}
+	else
+	{
+		dp->y_pos -= 16;
+	}
 }
 			
 bool is_end_of_buffer(const struct Display* dp)
+{		
+	return dp->buffer_pos >= dp->buffer_stop
+		|| dp->buffer[dp->buffer_pos%LCD_BUFFER_SIZE] == '\0';
+}
+
+bool is_end_of_line(const struct Display* dp)
 {
-	return dp->buffer_start >= dp->buffer_stop
-		|| dp->buffer[dp->buffer_start%LCD_BUFFER_SIZE] == '\0';
+	return MAX_LETTER_WIDTH + 2 * LETTER_WIDTH_MARGIN + dp->x_pos >= LCD_H_RES
+		|| dp->buffer[dp->buffer_pos%LCD_BUFFER_SIZE] == '\n';
 }
 
 void empty_buffer(uint16_t* buffer, const uint16_t start, const uint16_t stop)
